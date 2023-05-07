@@ -1,0 +1,105 @@
+import math
+from geopy.distance import great_circle
+from city import City, create_example_cities, get_cities_by_name
+
+class Itinerary():
+    """
+    A sequence of cities.
+    """
+
+    def __init__(self, cities: list[City]) -> None:
+        """
+        Creates an itinerary with the provided sequence of cities,
+        conserving order.
+        :param cities: a sequence of cities, possibly empty.
+        :return: None
+        """
+        #TODO
+        self.cities = cities
+       
+    def total_distance(self) -> int:
+        """
+        Returns the total distance (in km) of the itinerary, which is
+        the sum of the distances between successive cities.
+        :return: the total distance.
+        """
+        #TODO
+        distance = 0
+        if len(self.cities) > 0:
+            for i in range(len(self.cities) - 1):
+                city1_coords = self.cities[i].coordinates
+                city2_coords = self.cities[i + 1].coordinates
+                distance += math.ceil(great_circle(city1_coords, city2_coords).km)
+        return int(distance)
+
+
+    def append_city(self, city: City) -> None:
+        """
+        Adds a city at the end of the sequence of cities to visit.
+        :param city: the city to append
+        :return: None.
+        """
+        #TODO
+        self.cities.append(city)
+
+    def min_distance_insert_city(self, city: City) -> None:
+        """
+        Inserts a city in the itinerary so that the resulting
+        total distance of the itinerary is minimised.
+        :param city: the city to insert
+        :return: None.
+        """
+        #TODO
+        min_distance = float("inf")
+        min_index = 0
+
+        for i in range(len(self.cities) + 1):
+            temp_cities = self.cities[:i] + [city] + self.cities[i:]
+            temp_itin = Itinerary(temp_cities)
+            distance = temp_itin.total_distance()
+            if distance < min_distance:
+                min_distance = distance
+                min_index = i
+        self.cities.insert(min_index, city)
+
+    def __str__(self) -> str:
+        """
+        Returns the sequence of cities and the distance in parentheses
+        For example, "Melbourne -> Kuala Lumpur (6368 km)"
+
+        :return: a string representing the itinerary.
+        """
+        #TODO
+        result = ""
+        for i in range(len(self.cities) - 1):
+            result += f"{self.cities[i].name} -> "
+        if (len(self.cities) > 0):
+            result += f"{self.cities[-1].name} ({self.total_distance()} km)"
+        else:
+            result += f"({self.total_distance()} km)"
+        return result
+
+
+
+if __name__ == "__main__":
+    create_example_cities()
+    test_itin = Itinerary([get_cities_by_name("Melbourne")[0],
+                           get_cities_by_name("Kuala Lumpur")[0]])
+    print(test_itin)
+    city1 = City('Melbourne', (-37.8136, 144.9631), 'primary', 1000000, 1)
+    city2 = City('Sydney', (-33.8688, 151.2093), 'primary', 5000000, 2)
+    city3 = City('Brisbane', (-27.4698, 153.0251), 'primary', 2000000, 3)
+    itinerary = Itinerary([city1, city2,city3])
+    print(itinerary.total_distance())
+    #we try adding a city
+    test_itin.append_city(get_cities_by_name("Baoding")[0])
+    print(test_itin)
+
+    #we try inserting a city
+    test_itin.min_distance_insert_city(get_cities_by_name("Sydney")[0])
+    print(test_itin)
+
+    #we try inserting another city
+    test_itin.min_distance_insert_city(get_cities_by_name("Canberra")[0])
+    print(test_itin)
+
